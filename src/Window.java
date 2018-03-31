@@ -1,5 +1,8 @@
 import javafx.scene.paint.*;
+import javafx.animation.TranslateTransition;
 import javafx.application.Application;
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanBinding;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.scene.Scene;
@@ -13,6 +16,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
 public class Window extends Application{
 	Button button;
@@ -25,6 +29,7 @@ public class Window extends Application{
 	//Image image = new Image (file.toURI().toString());
 	ImageView iv = new ImageView(image);
 	
+	Rectangle col = new Rectangle(0,-300,400,20);
 
 	
 	public static void main(String[] args) {
@@ -50,7 +55,9 @@ public class Window extends Application{
 		r.setFill(new ImagePattern(image));
 		r.setTranslateX(0);
 		r.setTranslateY(370);
-		layout2.getChildren().addAll(r);
+		
+		col.setFill(Color.BLUE);
+		layout2.getChildren().addAll(r,col);
 		scene2.setOnKeyPressed(e -> {
 			switch(e.getCode()) {
 			case LEFT:
@@ -61,22 +68,13 @@ public class Window extends Application{
 				break;
 			case SPACE:	
 				try {
-					Rectangle b = this.addBullet();
-					int i = 370;
-					while(i != 0)
-					{
-						layout2.getChildren().remove(b);
-						b.setTranslateY(b.getTranslateY()-10);
-						layout2.getChildren().add(b);
-						System.out.println(b.getTranslateY());
-						Thread.sleep(100);
-						i = i -10;
-						
-					}
+					this.addBullet();
+					
 				} catch (Exception e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
+				//
 				break;
 
 			}
@@ -89,23 +87,35 @@ public class Window extends Application{
 		
 	}
 	
-	private Rectangle addBullet() throws Exception{
-		Task<Rectangle> task = new Bullet(r.getTranslateX(), r.getTranslateY());
-		//Bullet bullet = new Bullet(r.getTranslateX(), r.getTranslateY());
-		Thread thread = new Thread(task);
+	private void addBullet() throws Exception{
+		Bullet bullet = new Bullet(r.getTranslateX(), r.getTranslateY());
+		Thread thread = new Thread(bullet);
 		thread.start();
-		Rectangle b = task.get();
+		Rectangle b = bullet.call();
 		layout2.getChildren().add(b);
-		return b;
-		b.setTranslateY(b.getTranslateY()-10);
+		TranslateTransition transition = new TranslateTransition();		
+		transition.setDuration(Duration.seconds(1));
+		transition.setToY(-400);
+		transition.setNode(b);
+		transition.play();
 		
+		//if (b.getBoundsInParent().intersects(col.getBoundsInParent())) {
+		//	System.out.println("choco");
+		//}
 		
-		
-	//	Rectangle b = bullet.get();
-		//layout2.getChildren().add(b);
-		//return b;
-		
+		BooleanBinding collision = Bindings.createBooleanBinding( () -> 
+	    b.getBoundsInParent().intersects(col.getBoundsInParent()),
+	    b.boundsInParentProperty(),
+	    col.boundsInParentProperty());
 
+	collision.addListener((obs, wasColliding, isNowColliding) -> {
+	    if (isNowColliding) {
+	    	System.out.println("choco");
+	    	transition.stop();
+	    	layout2.getChildren().remove(b); // cuando colisiona elimina el cudro
+	    	
+	    }
+	});
 	}
 }
 

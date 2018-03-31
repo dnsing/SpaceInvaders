@@ -1,4 +1,3 @@
-
 import javafx.concurrent.Task;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
@@ -13,7 +12,6 @@ public class Bullet extends Task<Rectangle>{
 		
 		boolean alive;
 		int speed;
-		//direccion
 	}
 		
 	protected Rectangle call() throws Exception {
