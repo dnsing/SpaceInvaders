@@ -1,24 +1,36 @@
-import javafx.concurrent.Task;
-import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
-public class Invader{
+public class Invaders{
 	double X;
 	double Y;
+	Object invader;
+	Invaders next;
 
-	public Bullet(double X, double Y){
-		this.X = X;
-		this.Y = Y;
+	public Invaders(Object invader){
+		this.invader = invader;
+		this.next = null;
 		
 		boolean alive;
 		int speed;
 	}
+	
+	public Object getRec() {
+		return invader;
+	}
+	
+	public void setNext(Invaders next) {
+		this.next = next;
+	}
+	
+	public Invaders getNext() {
+		return next;
+	}
 		
-		Rectangle b = new Rectangle(X,Y,20,20);
+	/*	Rectangle b = new Rectangle(X,Y,20,20);
 		b.setFill(Color.WHITE);
 		b.setTranslateX(X);
 		b.setTranslateY(Y);
-	
+	*/
 	
 	
 }

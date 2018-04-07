@@ -56,8 +56,9 @@ public class Window extends Application{
 		r.setTranslateX(0);
 		r.setTranslateY(370);
 		
+		//teclado
 		col.setFill(Color.BLUE);
-		layout2.getChildren().addAll(r,col);
+		layout2.getChildren().addAll(r);
 		scene2.setOnKeyPressed(e -> {
 			switch(e.getCode()) {
 			case LEFT:
@@ -68,8 +69,7 @@ public class Window extends Application{
 				break;
 			case SPACE:	
 				try {
-					this.addBullet();
-					
+					this.addBullet();					
 				} catch (Exception e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
@@ -81,6 +81,8 @@ public class Window extends Application{
 				
 			
 		});
+		
+		addInvader();
 		
 		window.setScene(scene1);
 		window.show();
@@ -116,6 +118,32 @@ public class Window extends Application{
 	    	
 	    }
 	});
+	}
+	
+	private void addInvader() {
+		Rectangle inv = new Rectangle(200,-0,30,30);
+		Rectangle inv1 = new Rectangle(100,-0,30,30);
+		inv.setFill(new ImagePattern(image));
+		inv1.setFill(new ImagePattern(image));
+		inv.setTranslateX(100);
+		layout2.getChildren().addAll(inv,inv1);
+		
+		while(inv.getTranslateY()==400) {
+			inv.setTranslateX(inv.getTranslateX()+30);
+			if (inv.getTranslateX()==400 || inv.getTranslateX()==-400) {
+				inv.setTranslateY(inv.getTranslateY()+20);
+			}
+			
+		}
+		
+		Invaders_list listaEnemigos = new Invaders_list();
+		listaEnemigos.add(inv);
+		listaEnemigos.add(inv1);
+		//listaEnemigos.getRect();
+		
+		
+		
+		//layout2.getChildren().addAll(inv,inv1);
 	}
 }
 
