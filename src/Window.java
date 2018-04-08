@@ -1,23 +1,25 @@
 import javafx.scene.paint.*;
-import javafx.animation.Animation;
+
+import java.util.TimerTask;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import javafx.animation.TranslateTransition;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
-import javafx.concurrent.Task;
-import javafx.event.ActionEvent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.KeyCode;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
-import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import jdk.nashorn.internal.runtime.Undefined;
 
 public class Window extends Application{
 	Button button;
@@ -36,9 +38,8 @@ public class Window extends Application{
 	Rectangle inv1 = new Rectangle(100,-0,30,30);
 	Invaders_list listaEnemigos = new Invaders_list();
 	
-
 	int pos = 0;
-
+	ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
 
 	public static void main(String[] args) {
 		launch(args);
@@ -78,8 +79,8 @@ public class Window extends Application{
 			case SPACE:	
 				try {
 					//this.addBullet();		
-					this.colision(addBullet(), inv1);
-					this.colision(addBullet(), inv);
+					this.colision(addBullet(r), inv1);
+					this.colision(addBullet(r), inv);
 				} catch (Exception e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
@@ -93,11 +94,11 @@ public class Window extends Application{
 		
 		window.setScene(scene1);
 		window.show();
-		
-	}
+		}
 	
-	public Rectangle addBullet() throws Exception{
-		Bullet bullet = new Bullet(r.getTranslateX(), r.getTranslateY());
+	
+	public Rectangle addBullet(Rectangle rect) throws Exception{
+		Bullet bullet = new Bullet(rect.getTranslateX(), rect.getTranslateY());
 		Rectangle b = bullet.call();
 		layout2.getChildren().add(b);
 		return b;
@@ -128,14 +129,14 @@ public class Window extends Application{
 				layout2.getChildren().removeAll(inv,b); //cuando colisiona elimina el cudro
 				System.out.println(listaEnemigos.getPos());
 				listaEnemigos.dele(listaEnemigos.getPos());
+				executorService.shutdown();
 				listaEnemigos.getRect();
 				
-				return;
 			}
 		});
 	}
 
-	public void addInvader() throws InterruptedException {
+	public void addInvader() throws Exception {
 		layout2.getChildren().addAll(inv,inv1);
 		//System.out.println(layout2.getChildren().contains(inv));
 		
@@ -143,59 +144,66 @@ public class Window extends Application{
 		pos += 50;
 		invaderDisplay(inv1);
 		
-		
 		listaEnemigos.add(inv);
 		listaEnemigos.add(inv1);
 		//listaEnemigos.getRect();
 		
 		
-		
+		//movimiento invaders
 	}
-	public void invaderDisplay(Rectangle inv) {
+	public void invaderDisplay(Rectangle inv) throws Exception{
 		inv.setFill(new ImagePattern(image));
+		inv.setTranslateY(-350);
 		inv.setTranslateX(380 - pos);
+		
+		final Runnable tarea = () -> {
+			Platform.runLater(() -> {
+			    try {
+					this.colisionI(inv);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					//e.printStackTrace();
+				}
+			});
+		};
+		
+		executorService.scheduleAtFixedRate(tarea, 0, 2, TimeUnit.SECONDS); 
+		
 		double rep = 0.0;
 		TranslateTransition transition = new TranslateTransition();		
 		transition.setDuration(Duration.seconds(3-rep));
 		transition.setToX(-320 - pos);
 		transition.setNode(inv);
 		transition.setAutoReverse(true);
-		transition.setCycleCount(10);	
+		transition.setCycleCount(100);	
 		transition.play();
 		rep += 0.2;
 	}
+	
+	public void colisionI(Rectangle inv) throws Exception {
+		Rectangle b = addBullet(inv);
+		//b.setTranslateY(-350);
+	//	b.setTranslateX(inv.getTranslateX());
+		TranslateTransition transition0 = new TranslateTransition();		
+		transition0.setDuration(Duration.seconds(3));
+		transition0.setToY(400);
+		transition0.setNode(b);
+		transition0.play();
+		
+		BooleanBinding collision = Bindings.createBooleanBinding( () -> 
+	    b.getBoundsInParent().intersects(r.getBoundsInParent()),
+	    b.boundsInParentProperty(),
+	    r.boundsInParentProperty());
+		
+		collision.addListener((obs, wasColliding, isNowColliding) -> {
+			if (isNowColliding) {
+				System.out.println("choco");
+				transition0.stop();
+				layout2.getChildren().removeAll(r,b); //cuando colisiona elimina el cudro				
+			}
+		});
+		
+	}
+	
+
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
