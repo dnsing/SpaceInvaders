@@ -32,11 +32,38 @@ public class Invaders_list{
 		size++;
 	}
 	
+	public void deleteF() {
+		head = head.getNext();
+		size--;
+	}
 	
+	public void dele(int i) {
+
+		if(i>size) {
+			throw new IndexOutOfBoundsException("indice no valido");
+		}
+		else if(i==0) {
+			this.deleteF();
+		} 
+		else {
+			int cont = 0;
+			Invaders temporal = head;
+			while(cont < i -1) {
+				temporal = temporal.getNext();
+				cont++;
+			}
+			temporal.setNext(temporal.getNext().getNext());
+		}
+		size--;
+	}
+	
+	public int getPos() {
+		return size-1;
+	}
 	public void getRect() {
 		Invaders temp1 = head;
 		while(temp1 != null) {
-			
+			System.out.println(temp1);
 			temp1 = temp1.next;
 			
 		}

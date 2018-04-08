@@ -1,4 +1,5 @@
 import javafx.scene.paint.*;
+import javafx.animation.Animation;
 import javafx.animation.TranslateTransition;
 import javafx.application.Application;
 import javafx.beans.binding.Bindings;
@@ -31,7 +32,14 @@ public class Window extends Application{
 	
 	Rectangle col = new Rectangle(0,-300,400,20);
 
+	Rectangle inv = new Rectangle(200,-0,30,30);
+	Rectangle inv1 = new Rectangle(100,-0,30,30);
+	Invaders_list listaEnemigos = new Invaders_list();
 	
+
+	int pos = 0;
+
+
 	public static void main(String[] args) {
 		launch(args);
 	}
@@ -69,17 +77,16 @@ public class Window extends Application{
 				break;
 			case SPACE:	
 				try {
-					this.addBullet();					
+					//this.addBullet();		
+					this.colision(addBullet(), inv1);
+					this.colision(addBullet(), inv);
 				} catch (Exception e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
 				//
 				break;
-
 			}
-				
-			
 		});
 		
 		addInvader();
@@ -89,61 +96,73 @@ public class Window extends Application{
 		
 	}
 	
-	private void addBullet() throws Exception{
+	public Rectangle addBullet() throws Exception{
 		Bullet bullet = new Bullet(r.getTranslateX(), r.getTranslateY());
-		Thread thread = new Thread(bullet);
-		thread.start();
 		Rectangle b = bullet.call();
 		layout2.getChildren().add(b);
+		return b;
+	}
+	
+	public void colision(Rectangle b, Rectangle inv) {
 		TranslateTransition transition = new TranslateTransition();		
 		transition.setDuration(Duration.seconds(1));
 		transition.setToY(-400);
 		transition.setNode(b);
 		transition.play();
 		
-		//if (b.getBoundsInParent().intersects(col.getBoundsInParent())) {
-		//	System.out.println("choco");
-		//}
-		
 		BooleanBinding collision = Bindings.createBooleanBinding( () -> 
-	    b.getBoundsInParent().intersects(col.getBoundsInParent()),
+	    b.getBoundsInParent().intersects(inv.getBoundsInParent()),
 	    b.boundsInParentProperty(),
-	    col.boundsInParentProperty());
+	    inv.boundsInParentProperty());
 
-	collision.addListener((obs, wasColliding, isNowColliding) -> {
-	    if (isNowColliding) {
-	    	System.out.println("choco");
-	    	transition.stop();
-	    	layout2.getChildren().remove(b); // cuando colisiona elimina el cudro
-	    	
-	    }
-	});
-	}
-	
-	private void addInvader() {
-		Rectangle inv = new Rectangle(200,-0,30,30);
-		Rectangle inv1 = new Rectangle(100,-0,30,30);
-		inv.setFill(new ImagePattern(image));
-		inv1.setFill(new ImagePattern(image));
-		inv.setTranslateX(100);
-		layout2.getChildren().addAll(inv,inv1);
-		
-		while(inv.getTranslateY()==400) {
-			inv.setTranslateX(inv.getTranslateX()+30);
-			if (inv.getTranslateX()==400 || inv.getTranslateX()==-400) {
-				inv.setTranslateY(inv.getTranslateY()+20);
+		collision.addListener((obs, wasColliding, isNowColliding) -> {
+			if (!layout2.getChildren().contains(inv)) {
+				return;
 			}
-			
-		}
+			else if(listaEnemigos.getPos() < 0) {
+				return;
+			}
+			else if (isNowColliding) {
+				System.out.println("choco");
+				transition.stop();
+				layout2.getChildren().removeAll(inv,b); //cuando colisiona elimina el cudro
+				System.out.println(listaEnemigos.getPos());
+				listaEnemigos.dele(listaEnemigos.getPos());
+				listaEnemigos.getRect();
+				
+				return;
+			}
+		});
+	}
+
+	public void addInvader() throws InterruptedException {
+		layout2.getChildren().addAll(inv,inv1);
+		//System.out.println(layout2.getChildren().contains(inv));
 		
-		Invaders_list listaEnemigos = new Invaders_list();
+		invaderDisplay(inv);
+		pos += 50;
+		invaderDisplay(inv1);
+		
+		
 		listaEnemigos.add(inv);
 		listaEnemigos.add(inv1);
 		//listaEnemigos.getRect();
 		
 		
 		
-		//layout2.getChildren().addAll(inv,inv1);
+	}
+	public void invaderDisplay(Rectangle inv) {
+		inv.setFill(new ImagePattern(image));
+		inv.setTranslateX(380 - pos);
+		double rep = 0.0;
+		TranslateTransition transition = new TranslateTransition();		
+		transition.setDuration(Duration.seconds(3-rep));
+		transition.setToX(-320 - pos);
+		transition.setNode(inv);
+		transition.setAutoReverse(true);
+		transition.setCycleCount(10);	
+		transition.play();
+		rep += 0.2;
 	}
 }
 
