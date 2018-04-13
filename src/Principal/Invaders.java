@@ -1,12 +1,13 @@
+package Principal;
 import javafx.scene.shape.Rectangle;
 
 public class Invaders{
 	double X;
 	double Y;
-	Object invader;
+	Rectangle invader;
 	Invaders next;
 
-	public Invaders(Object invader){
+	public Invaders(Rectangle invader){
 		this.invader = invader;
 		this.next = null;
 		
@@ -14,7 +15,7 @@ public class Invaders{
 		int speed;
 	}
 	
-	public Object getRec() {
+	public Rectangle getRec() {
 		return invader;
 	}
 	
@@ -25,12 +26,5 @@ public class Invaders{
 	public Invaders getNext() {
 		return next;
 	}
-		
-	/*	Rectangle b = new Rectangle(X,Y,20,20);
-		b.setFill(Color.WHITE);
-		b.setTranslateX(X);
-		b.setTranslateY(Y);
-	*/
-	
 	
 }
